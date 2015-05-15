@@ -7,6 +7,7 @@ deplibs: openssl expat libstrophe-build
 libstrophe-build: libstrophe.a
 
 libstrophe.a:
+	tar zxvf libstrophe.tgz
 	-cd libstrophe ; ./bootstrap.sh ; ./configure openssl_CFLAGS=-I${PWD}/openssl-1.0.2/include openssl_LIBS=-L${PWD}  expat_CFLAGS=-I${PWD}/expat-2.1.0/lib expat_LIBS=-L${PWD}  ; make
 	cp libstrophe/.libs/libstrophe.a .
 
