@@ -8,7 +8,6 @@
 #include <strophe.h>
 #include "common.h"
 
-#if 1
 int presence_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata)
 {
     xmpp_stanza_t *pres;
@@ -35,6 +34,7 @@ int presence_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, voi
 
 }
 
+#if 0
 int message_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata)
 {    
     xmpp_ctx_t *ctx = (xmpp_ctx_t*)userdata;
@@ -52,7 +52,7 @@ int message_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void
 
 }
 
-
+#endif
 #if 1
 /* define a handler for connection events */
 void conn_handler(xmpp_conn_t * const conn, const xmpp_conn_event_t status,
@@ -64,9 +64,9 @@ void conn_handler(xmpp_conn_t * const conn, const xmpp_conn_event_t status,
         fprintf(stderr, "connected Received : [%s]\n", (char *)userdata);    
         
         XMPP_Presence(conn);
-        xmpp_handler_add(conn, iq_ibb_open_handler, "http://jabber.org/protocol/ibb", "iq", "set", ctx);	
- 
-        xmpp_handler_add(conn,message_handler, NULL, "message", NULL , ctx); 
+        xmpp_handler_add(conn, XMPP_IBB_handler, XMLNS_IBB , \
+	"iq", "set", ctx);	 
+//        xmpp_handler_add(conn,message_handler, NULL, "message", NULL , ctx); 
        
     }
     else {
@@ -184,7 +184,7 @@ unsigned short port, xmpp_conn_handler callback )
     ctx = xmpp_ctx_new(NULL, log);     
 
    //    /* initiate connection */
-    xmpp_connect_client(conn, host, port, iq_ibb_open_handler, ctx);
+    xmpp_connect_client(conn, host, port, XMPP_IBB_handler, ctx);
 
 }
 
@@ -195,8 +195,8 @@ void XMPP_Close(xmpp_ctx_t *ctx,  xmpp_conn_t *conn)
     if(conn !=NULL)
         xmpp_disconnect(conn);
 
-    xmpp_handler_delete(conn, message_handler);
-    xmpp_handler_delete(conn, iq_ibb_open_handler);  
+//    xmpp_handler_delete(conn, message_handler);
+    xmpp_handler_delete(conn, XMPP_IBB_handler);  
  
     xmpp_conn_release(conn);
 
@@ -209,5 +209,4 @@ void XMPP_Close(xmpp_ctx_t *ctx,  xmpp_conn_t *conn)
    xmpp_shutdown();
 
 }
-#endif
 #endif

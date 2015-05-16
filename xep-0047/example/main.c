@@ -1,5 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <pthread.h>
+#include <limits.h>
+
 #include <strophe.h>
 #include "common.h"
 
@@ -7,12 +10,13 @@
 #define MAX_XMPPPW_LEN 128
 #define MAX_XMPPSV_LEN 128
 
-
+#if 0
 //char xmpp_un[MAX_XMPPUN_LEN]="ryanh\\40workssys.com@cloud01.workssys.com/Ryan_903";
 char xmpp_un[MAX_XMPPUN_LEN]="wks.rds\\40gmail.com@cloud01.workssys.com/Ryan_RAE";
 //char xmpp_pw[MAX_XMPPPW_LEN]="85jlufvf3mmebvebt65cb9nc8s";
 char xmpp_pw[MAX_XMPPPW_LEN]="a0idvpmmvc6jnpb6aji6bgslre";
 char xmpp_server[MAX_XMPPSV_LEN]="cloud01.workssys.com";
+#endif
 
 xmpp_conn_t*  XMPP_Init(char* jid, char* pass, char* host, xmpp_ctx_t  **pctx);
 void XMPP_Close(xmpp_ctx_t *ctx,  xmpp_conn_t *conn);
@@ -30,27 +34,59 @@ void conn_handler(xmpp_conn_t * const conn, const xmpp_conn_event_t status,
 }
 #endif
 
-void main()
+pthread_attr_t attr1;
+pthread_t pid1;
+
+void main(int argc, char **argv)
 {
-
-#if 1
+ 
     xmpp_conn_t* conn = NULL;
-    xmpp_ctx_t *ctx = NULL;
-    conn = XMPP_Init(xmpp_un , xmpp_pw, xmpp_server, &ctx);
-    
+    xmpp_ctx_t *ctx = NULL;    
+    char *jid, *pass, *host;	
+    int errornum=0;
+    void *ptr;
+    pthread_attr_init(&attr1);
+    pthread_attr_setstacksize(&attr1, PTHREAD_STACK_MIN * 2);
+
+      
+    /* take a jid and password on the command line */
+    if (argc < 3 || argc > 4) {
+        fprintf(stderr, "Usage: xep0047-test  <jid> <pass> [<host>]\n\n");
+        return ;
+    }
+
+    jid = argv[1];
+    pass = argv[2];
+    host = NULL;
+
+    if (argc == 4)
+        host = argv[3];
+
+    conn = XMPP_Init(jid , pass, host, &ctx);
 
 
-//    Register_IBB_CB(conn, xmpp_server, 0 );
+    if(ctx !=NULL)
+        pthread_create(&pid1, \
+        &attr1, (void*)xmpp_run, (void*)ctx );
 
-
-    xmpp_run(ctx);
 
     xmpp_stop(ctx);
     sleep(1);
     XMPP_Close(ctx, conn);
-#endif
+
+
+    if ((errornum = pthread_cancel(pid1)) != 0)
+        fprintf(stderr, "pthread_cancel: %s", strerror(errornum));
+    if ((errornum = pthread_join(pid1, &ptr)) != 0)
+        fprintf(stderr, "pthread_join: %s", strerror(errornum));
+
+
 
 }
+
+
+
+
 #if 0 
 xmpp_conn_t*  XMPP_Init(char* jid, char* pass, char* host, xmpp_ctx_t  **pctx)
 {
