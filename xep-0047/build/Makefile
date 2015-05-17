@@ -35,7 +35,7 @@ OBJS = $(patsubst %.c,$(OBJPATH)/%.o,$(NOTDIRSRCS))
 MIPS_OBJS= $(patsubst %.c,$(MIPS_OBJPATH)/%.o,$(NOTDIRSRCS))
 
 
-LIBS = $(LIBPATH)/libstrophe.a   $(LIBPATH)/libssl.a  $(LIBPATH)/libcrypto.a     $(LIBPATH)/libexpat.a -lpthread  -lm -lresolv -ldl
+#LIBS = $(LIBPATH)/libstrophe.a   $(LIBPATH)/libssl.a  $(LIBPATH)/libcrypto.a     $(LIBPATH)/libexpat.a -lpthread  -lm -lresolv -ldl
 
 #LIBS = $(LIBPATH)/libstrophe.a $(LIBPATH)/libexpat.a -lpthread  -lssl -lcrypto  -lm -lresolv 
 EXAMPLE_PATH=../example

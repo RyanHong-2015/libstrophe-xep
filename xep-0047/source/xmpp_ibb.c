@@ -12,7 +12,12 @@ xmpp_ibb_session_t* gXMPP_IBB_handle;
 char* gRecv=NULL;
 xmpp_stanza_t* gStanza=NULL;
 
-#if 1
+/*
+* Main callback function to dispatch XEP-0047 open/data/close stanzas 
+*   @param conn   a Strophe connection object  
+*   @param stanza  a Strophe stanza object received from sender.
+*   @param userdata  a callback interface to pass xmpp_ctx. 
+*/
 int XMPP_IBB_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata)
 {
     char*  szBlock_size;
@@ -31,6 +36,7 @@ int XMPP_IBB_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, voi
             xmpp_stanza_get_attribute(xmpp_stanza_get_child_by_name(stanza, "open"), "sid");
     printf("XEP0047 IQ blocksize=%s sid=%s \n",szBlock_size, szSid );
 
+#if 0   // The is used to support multi sesssion. not verified. 
 	xmpp_ibb_session_t* ibb_ssn_p;	
 	ibb_ssn_p = malloc(sizeof(xmpp_ibb_session_t));
         ibb_ssn_p->sid = malloc(strlen(szSid)+1);		
@@ -43,6 +49,7 @@ int XMPP_IBB_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, voi
 
 	//=================> gXMPP_IBB_handle-> next = ibb_ssn_p;
 	XMPP_IBB_Add_Session_Queue(ibb_ssn_p);
+#endif
 
         XMPP_IBB_Ack_Send(conn, stanza, userdata);
 
@@ -60,7 +67,6 @@ int XMPP_IBB_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, voi
     }
     return 1;
 }
-#endif
 
 int XMPP_IBB_Data_Process(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata)
 {
@@ -119,6 +125,12 @@ error:
     return 1;
 }
 
+/*  Send XEP-0047 Data 
+*   @param conn   a Strophe connection object 
+*   @param stanza  received stanza from sender. It implies sid and sender "from"
+*   @param userdata  pass xmpp_ctx
+*   @param resp Data in string to be sent.
+*/
 
 void XMPP_IBB_SendPayload(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, 
 void * const userdata, char* resp )
