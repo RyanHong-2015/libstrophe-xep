@@ -1,0 +1,6 @@
+
+    This library is used to support XEP-0047 based on libstrophe. However, it is
+    still beta version 1.0 now and it is not supported multi session handle. It is    also not supported multipule blocks handle and user should have to take 
+    caare it. 
+
+
