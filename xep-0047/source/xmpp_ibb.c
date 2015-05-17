@@ -9,13 +9,17 @@
 #include "common.h"
 
 xmpp_ibb_session_t* gXMPP_IBB_handle;
-
+char* gRecv=NULL;
+xmpp_stanza_t* gStanza=NULL;
 
 #if 1
 int XMPP_IBB_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata)
 {
     char*  szBlock_size;
     char*  szSid;
+
+	
+    printf("XMPP IBB Handler\n");
 
     if( xmpp_stanza_get_child_by_name(stanza, "open") != NULL)
     {
@@ -47,8 +51,8 @@ int XMPP_IBB_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, voi
     {
         XMPP_IBB_Ack_Send(conn, stanza, userdata);
         printf("========XEP0047 Data process\n");
-        XMPP_IBB_Data_Process(conn, stanza  , userdata);
-
+        XMPP_IBB_Data_Process(conn, stanza  , userdata);   
+       
     }
     else if( xmpp_stanza_get_child_by_name(stanza, "close")  )
     {
@@ -65,7 +69,7 @@ int XMPP_IBB_Data_Process(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza
     unsigned char *result;
     xmpp_ctx_t *ctx = (xmpp_ctx_t*)userdata;
     char *szSid, szSeq;	
-    xmpp_ibb_session_t* ibb_ssn;
+//    xmpp_ibb_session_t* ibb_ssn;
     
 
     szSid = \
@@ -79,6 +83,14 @@ int XMPP_IBB_Data_Process(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza
     printf("[Sid=%s][Seq=%s][Raw Data=%s]\n", szSid, szSeq, intext);
     result = base64_decode(ctx, intext, strlen(intext));
     printf("Decode result=%s\n", result);
+
+    gRecv = malloc(strlen(result)+1);
+    strcpy(gRecv, result);
+    
+    if(gStanza == NULL)
+        gStanza = xmpp_stanza_copy(stanza);
+
+#if 0  //data queue function has not been verified.  
 	            
     ibb_ssn = XMPP_Get_IBB_Session_Handle(szSid);
 
@@ -96,6 +108,7 @@ int XMPP_IBB_Data_Process(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza
     strcpy(ibb_data_new->recv_data, result);
    
     XMPP_IBB_Add_Session_Data_Queue(ibb_ssn, ibb_data_new);
+#endif
 
 error:
     xmpp_free(ctx, szSid);
@@ -107,15 +120,14 @@ error:
 }
 
 
-void XMPP_IBB_SendPayload(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata, char* resp )
+void XMPP_IBB_SendPayload(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, 
+void * const userdata, char* resp )
 {
 
     static int seq = 0;
     int data_seq = 0;
-//    char* buf;
     char Data_Seq_Buf[32];
     char ID_Buf[32];
-//    char *resp;
     char* encoded_data;
     xmpp_ctx_t *ctx = (xmpp_ctx_t *)userdata;
     xmpp_stanza_t *iq, *data,  *text;
@@ -271,6 +283,48 @@ xmpp_ibb_data_t*  ibb_data_new)
     }
 
 }
+
+void XMPP_IBB_Del_Session_Data_Queue(xmpp_ibb_session_t* ibb_ssn)
+{
+
+    xmpp_ibb_data_t* tmp;
+    tmp =  ibb_ssn->ibb_data_queue;
+    ibb_ssn->ibb_data_queue = tmp->next;
+
+    free(tmp->seq_num); 
+    free(tmp->recv_data);
+    free(tmp);
+
+}
+
+char* XMPP_IBB_Get_Recv()
+{   
+    return gRecv;
+}
+
+void XMPP_IBB_Reset_Recv()
+{
+     if(gRecv !=NULL)
+	free(gRecv);
+
+     gRecv = NULL;
+}
+
+
+xmpp_stanza_t* XMPP_IBB_Get_gStanza()
+{
+    return gStanza;	
+}
+
+void XMPP_IBB_Reset_gStanza()
+{
+
+    if(gStanza != NULL)
+        xmpp_stanza_release(gStanza);
+     gStanza = NULL;
+
+}
+
 
 
 

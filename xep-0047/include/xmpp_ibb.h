@@ -26,8 +26,19 @@ int XMPP_IBB_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, voi
 
 int XMPP_IBB_data_process(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata);
 
+void XMPP_IBB_SendPayload(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
+void * const userdata, char* resp);
+
 void XMPP_IBB_Data_Send(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata);
 
 void XMPP_IBB_Ack_Send(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata);
 
 void XMPP_IBB_Close_Send(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata);
+
+
+char* XMPP_IBB_Get_Recv();
+void XMPP_IBB_Reset_Recv();
+xmpp_stanza_t* XMPP_IBB_Get_gStanza();
+void XMPP_IBB_Reset_gStanza();
+
+

@@ -146,7 +146,6 @@ void XMPP_Presence(xmpp_conn_t* conn)
 
 }
 
-#if 1
 xmpp_conn_t*  XMPP_Init(char* jid, char* pass, char* host, xmpp_ctx_t  **pctx)
 {
     xmpp_conn_t *conn;
@@ -209,4 +208,4 @@ void XMPP_Close(xmpp_ctx_t *ctx,  xmpp_conn_t *conn)
    xmpp_shutdown();
 
 }
-#endif
+
